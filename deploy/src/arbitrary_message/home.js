@@ -59,7 +59,8 @@ async function initializeBridge({ validatorsBridge, bridge, initialNonce }) {
     nonce,
     to: bridge.options.address,
     privateKey: deploymentPrivateKey,
-    url: HOME_RPC_URL
+    url: HOME_RPC_URL,
+    chainid: homeChainId
   })
   if (txInitializeHomeBridge.status) {
     assert.strictEqual(Web3Utils.hexToNumber(txInitializeHomeBridge.status), 1, 'Transaction Failed')
@@ -77,6 +78,7 @@ async function deployHome() {
   console.log('========================================\n')
 
   let nonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
+  const chainid = await web3Home.eth.getChainId()
 
   console.log('deploying storage for home validators')
   const storageValidatorsHome = await deployContract(EternalStorageProxy, [], {
@@ -100,7 +102,8 @@ async function deployHome() {
     implementationAddress: bridgeValidatorsHome.options.address,
     version: '1',
     nonce,
-    url: HOME_RPC_URL
+    url: HOME_RPC_URL,
+    chainid
   })
   nonce++
 
@@ -114,7 +117,8 @@ async function deployHome() {
     rewardAccounts: [],
     owner: HOME_VALIDATORS_OWNER,
     nonce,
-    url: HOME_RPC_URL
+    url: HOME_RPC_URL,
+    chainid
   })
   nonce++
 
@@ -123,7 +127,8 @@ async function deployHome() {
     proxy: storageValidatorsHome,
     newOwner: HOME_UPGRADEABLE_ADMIN,
     nonce,
-    url: HOME_RPC_URL
+    url: HOME_RPC_URL,
+    chainid
   })
   nonce++
 
@@ -149,7 +154,8 @@ async function deployHome() {
     implementationAddress: homeBridgeImplementation.options.address,
     version: '1',
     nonce,
-    url: HOME_RPC_URL
+    url: HOME_RPC_URL,
+    chainid
   })
   nonce++
 
@@ -157,7 +163,8 @@ async function deployHome() {
   nonce = await initializeBridge({
     validatorsBridge: storageValidatorsHome,
     bridge: homeBridgeImplementation,
-    initialNonce: nonce
+    initialNonce: nonce,
+    chainid
   })
 
   console.log('transferring proxy ownership to multisig for Home bridge Proxy contract')
@@ -165,7 +172,8 @@ async function deployHome() {
     proxy: homeBridgeStorage,
     newOwner: HOME_UPGRADEABLE_ADMIN,
     nonce,
-    url: HOME_RPC_URL
+    url: HOME_RPC_URL,
+    chainid
   })
 
   console.log('\nDeployment of Arbitrary Message Bridge at Home completed\n')
